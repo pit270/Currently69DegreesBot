@@ -2,6 +2,7 @@ from __future__ import annotations                  #Implemented in Python 3.10.
 import csv
 from time import sleep
 from datetime import datetime
+import os
 import requests
 import json
 import tokens                                       #local file that stores api keys
@@ -9,9 +10,14 @@ import twitter                                      #pip install python-twitter
 
 WEATHER_API_URL = "http://api.weatherapi.com/v1/current.json"
 
+CSV_PATH = os.path.join(os.path.dirname(__file__), "cityList.csv")
+
 TARGET_TEMP = 69
 
+MAX_FAIL = 4
+
 delay = .25
+errorCount = 0
 
 class City:
     name: str
@@ -53,9 +59,10 @@ returns a list of cities where the current temp in Fahrenheit is equal to the ta
 '''
 def getMatchingCities() -> list[City]:
     global delay
+    global errorCount
     matchingCities = []
 
-    with open('cityList.csv') as csvfile:
+    with open(CSV_PATH) as csvfile:
         reader = csv.reader(csvfile)
         reader.__next__()                                               # skip header row
         for row in reader:
@@ -78,6 +85,9 @@ def getMatchingCities() -> list[City]:
             except Exception as error:
                 LogException(error, "Probably being rate limited by API. Increasing delay")
                 delay += .25
+                errorCount += 1
+                if errorCount > MAX_FAIL:
+                    break
 
             sleep(delay)                                                  # so the api doesnt get mad
 
