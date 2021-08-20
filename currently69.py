@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import requests
 import json
+import random
 import tokens                                       #local file that stores api keys
 import twitter                                      #pip install python-twitter
 
@@ -97,7 +98,7 @@ def main() -> None:
     try:
         print(twttr.VerifyCredentials())
         matchingCities = getMatchingCities()
-        matchingCities.sort()
+        random.shuffle(matchingCities)
         print(f"It is currently {TARGET_TEMP} degrees in the following cities")
         for city in matchingCities:
             print(city)
